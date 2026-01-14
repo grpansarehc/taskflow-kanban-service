@@ -11,7 +11,7 @@ import com.taskflow.kanban_service.services.KanbanService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/kanban")
+@RequestMapping("/api/kanban")
 @RequiredArgsConstructor
 public class KanbanController {
 

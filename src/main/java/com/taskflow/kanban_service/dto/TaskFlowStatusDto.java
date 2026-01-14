@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record TaskFlowStatusDto(
         UUID id,
-        String name,
+        String statusName,
         Integer position
 ) {}

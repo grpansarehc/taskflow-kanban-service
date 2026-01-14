@@ -19,29 +19,48 @@ public class KanbanService {
 
     public KanbanBoardResponse getBoard(UUID projectId) {
 
-        // 1️⃣ Get workflow (columns)
-        List<TaskFlowStatusDto> statuses =
-                projectClient.getWorkflow(projectId);
+       
+        List<TaskFlowStatusDto> statuses;
+        try {
+            statuses = projectClient.getWorkflow(projectId);
+        } catch (Exception e) {
+            System.err.println("KanbanService: Error calling ProjectClient for workflow: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
 
-        // 2️⃣ Get tasks
-        List<TaskDto> tasks =
-                taskClient.getTasksByProject(projectId);
+       
+        List<TaskDto> tasks;
+        try {
+            tasks = taskClient.getTasksByProject(projectId);
+        } catch (Exception e) {
+            System.err.println("KanbanService: Error calling TaskClient for tasks: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+        
+       
+        if (tasks != null) {
+            System.out.println("KanbanService: Fetched " + tasks.size() + " tasks.");
+            tasks.forEach(t -> System.out.println("Task: " + t.title() + ", Type: " + t.taskType()));
+        } else {
+            System.out.println("KanbanService: Fetched tasks is null");
+        }
 
-        // 3️⃣ Group tasks by status
+     
         Map<UUID, List<TaskDto>> tasksByStatus =
                 tasks.stream()
                         .collect(Collectors.groupingBy(TaskDto::statusId));
 
-        // 4️⃣ Build board
         List<KanbanColumnResponse> columns = statuses.stream()
-                .sorted(Comparator.comparing(TaskFlowStatusDto::position))
+                .sorted(Comparator.comparing(TaskFlowStatusDto::position, Comparator.nullsLast(Comparator.naturalOrder())))
                 .map(status -> new KanbanColumnResponse(
                         status.id(),
-                        status.name(),
+                        status.statusName(),
                         tasksByStatus
                                 .getOrDefault(status.id(), new ArrayList<>())
                                 .stream()
-                                .sorted(Comparator.comparing(TaskDto::position))
+                                .sorted(Comparator.comparing(TaskDto::position, Comparator.nullsLast(Comparator.naturalOrder())))
                                 .toList()
                 ))
                 .toList();

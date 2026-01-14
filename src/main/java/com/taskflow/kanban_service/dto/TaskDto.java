@@ -6,5 +6,10 @@ public record TaskDto(
         UUID taskId,
         String title,
         UUID statusId,
-        Integer position
+        Integer position,
+        String taskType,
+        String description,
+        String priority,
+        String dueDate,
+        UUID assigneeId
 ) {}
